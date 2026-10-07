@@ -1,0 +1,28 @@
+<!doctype html>
+<title>Chatroom</title>
+<ul id="log"></ul>
+<input id="msg" placeholder="Say something" autofocus>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+  const user = prompt("Nickname?") || "anon";
+  const room = "general";
+  const socket = io();
+  const log = document.getElementById("log");
+
+  function add(text) {
+    const li = document.createElement("li");
+    li.textContent = text;          // textContent, never innerHTML (XSS)
+    log.appendChild(li);
+  }
+
+  socket.on("connect", () => socket.emit("join", { user, room }));
+  socket.on("system", add);
+  socket.on("message", (m) => add(`${m.user}: ${m.body}`));
+
+  document.getElementById("msg").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      socket.emit("message", { user, room, body: e.target.value });
+      e.target.value = "";
+    }
+  });
+</script>
