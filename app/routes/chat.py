@@ -4,6 +4,8 @@ import asyncio, json, time
 bp = Blueprint("main", __name__)
 
 messages = []
+
+# Condition() allows for a client to wait until something is produced rather than polling the endpoint repeatedly
 cond = asyncio.Condition() # lets streams sleep
 
 @bp.post("/send")
