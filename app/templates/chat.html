@@ -1,0 +1,32 @@
+<!doctype html>
+<div id="log" style="height:300px;overflow:auto;border:1px solid #ccc"></div>
+<input id="user" placeholder="nick" size="8">
+<input id="text" placeholder="message" onkeydown="if(event.key==='Enter')send()">
+<script>
+    const log = document.getElementById('log');
+    const es = new EventSource('/stream');
+    
+    es.onmessage = e => {
+        const m = JSON.parse(e.data);
+        const row = document.createElement('div');
+        const nick = document.createElement('b');
+    
+        nick.textContent = m.user;
+        row.append(nick, ': ' + m.text);   // textContent-safe, no XSS
+        log.append(row);
+        log.scrollTop = log.scrollHeight;
+    };
+
+    function send() {
+        const t = document.getElementById('text');
+        
+        if (!t.value) return;
+            fetch('/send', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user: document.getElementById('user').value, text: t.value})
+        });
+
+        t.value = '';
+    }
+</script>
